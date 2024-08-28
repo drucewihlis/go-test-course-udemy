@@ -1,10 +1,12 @@
 // go test .
+// go test -v -run Test_isPrime
+// go test -v -run Test_alpha
 // go test -cover .
 // go test -coverprofile=coverage.out .
 // go tool cover -html=coverage.out  // should open browser, does not work for me
 // go tool cover -html=coverage.out -o coverage.html // generates html
 
-// go test -coverprofile=coverage.out . && go tool cover -html=coverage.out -o coverage.html
+// go test -v -coverprofile=coverage.out . && go tool cover -html=coverage.out -o coverage.html
 
 package main
 
@@ -17,7 +19,7 @@ import (
     "bytes"
 )
 
-func Test_isPrime(t *testing.T) {
+func Test_alpha_isPrime(t *testing.T) { // aplha is arranging 2 tests into a test suite
     primeTests := []struct {
         name string
         testNum int
@@ -47,7 +49,7 @@ func Test_isPrime(t *testing.T) {
     }
 }
 
-func Test_prompt(t *testing.T) {
+func Test_alpha_prompt(t *testing.T) {
     // save a copy of os.Stdout
     oldOut := os.Stdout
 
