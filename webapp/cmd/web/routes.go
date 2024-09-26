@@ -1,6 +1,5 @@
 package main
 
-
 import (
 	"net/http"
 
@@ -15,7 +14,7 @@ func (app *application) routes() http.Handler {
 	mux.Use(middleware.Recoverer)
 	mux.Use(app.addIPToContext)
 
-	//  register routes
+	// register routes
 	mux.Get("/", app.Home)
 
 	// static assets

@@ -1,1 +1,3 @@
-.idea
+pkg/ 
+.idea/
+webapp/cmd/web/coverage*

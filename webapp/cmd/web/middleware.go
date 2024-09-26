@@ -15,7 +15,7 @@ func (app *application) ipFromContext(ctx context.Context) string {
 	return ctx.Value(contextUserKey).(string)
 }
 
-func(app *application) addIPToContext(next http.Handler) http.Handler {
+func (app *application) addIPToContext(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var ctx = context.Background()
 		// get the ip (as accurately as possible)
@@ -34,7 +34,7 @@ func(app *application) addIPToContext(next http.Handler) http.Handler {
 }
 
 
-func getIP(r* http.Request) (string, error) {
+func getIP(r *http.Request) (string, error) {
 	ip, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
 		return "unknown", err
@@ -47,7 +47,7 @@ func getIP(r* http.Request) (string, error) {
 
 	forward := r.Header.Get("X-Forwarded-For")
 	if len(forward) > 0 {
-		ip =forward
+		ip = forward
 	}
 
 	if len(ip) == 0 {
