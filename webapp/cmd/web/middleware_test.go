@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -21,7 +23,7 @@ func Test_application_addIPToContext(t *testing.T) {
 
 	var app application
 
-	// create a dummy handler that we''l use to check the context
+	// create a dummy handler that we'll use to check the context
 	nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
 		// make sure that the value exists in the context
 		val := r.Context().Value(contextUserKey)
@@ -56,5 +58,18 @@ func Test_application_addIPToContext(t *testing.T) {
 		}
 
 		handlerToTest.ServeHTTP(httptest.NewRecorder(), req)
+	}
+}
+
+func Test_application_ipFromContext(t *testing.T) {
+	var app application
+	var expected = "whatever"
+
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, contextUserKey, expected)
+
+	ip := app.ipFromContext(ctx)
+	if !strings.EqualFold(expected, ip) {
+		t.Errorf("Wrong value from context: expected %s, got %s", expected, ip)
 	}
 }
