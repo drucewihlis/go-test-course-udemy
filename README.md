@@ -21,6 +21,5 @@ Test
 Generate cov report:
 
 ```
-cd cmd/web
-go test -v -coverprofile=coverage.out . && go tool cover -html=coverage.out -o coverage.html
+go test ./cmd/web -v -coverprofile=coverage.out . && go tool cover -html=coverage.out -o coverage.html
 ```
