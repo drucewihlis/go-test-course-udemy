@@ -23,3 +23,13 @@ Generate cov report:
 ```
 go test ./cmd/web -v -coverprofile=coverage.out . && go tool cover -html=coverage.out -o coverage.html
 ```
+
+# Using Postgres db
+
+`docker-compose up` to start db
+
+Correct user is 
+```
+admin@example.com
+secret
+```
