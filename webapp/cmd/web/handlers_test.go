@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 )
@@ -54,9 +55,6 @@ func TestApp_renderWithBadTemplate(t *testing.T) {
 	}
 
 	pathToTemplates = "./../../templates/"  
-	// bug here in the course.  
-	// W/o this line if TestAppHome runs after TestApp_renderWithBadTemplate, it takes wrong templates
-	// So it is needed to be explicitly reassigned, which is not done pretty  here, but works
 }
 
 func getCtx(req *http.Request) context.Context {
@@ -108,6 +106,74 @@ func TestAppHome(t *testing.T) {
 		body, _ := io.ReadAll(rr.Body)
 		if !strings.Contains(string(body), e.expectedHTML) {
 			t.Errorf("%s: did not find %s in resp body", e.name, e.expectedHTML)
+		}
+	}
+}
+
+func Test_app_Login(t *testing.T) {
+	var tests = []struct{
+		name string
+		postedData url.Values
+		expectedStatusCode int
+		expectedLoc string
+	} {
+		{
+			name: "valid login",
+			postedData: url.Values{
+				"email": {"admin@example.com"},
+				"password": {"secret"},
+			},
+			expectedStatusCode: http.StatusSeeOther,
+			expectedLoc: "/user/profile",
+		},
+		{
+			name: "missing form data",
+			postedData: url.Values{
+				"email": {""},
+				"password": {""},
+			},
+			expectedStatusCode: http.StatusSeeOther,
+			expectedLoc: "/",
+		},
+		{
+			name: "user not found",
+			postedData: url.Values{
+				"email": {"you@there.com"},
+				"password": {"password"},
+			},
+			expectedStatusCode: http.StatusSeeOther,
+			expectedLoc: "/",
+		},
+		{
+			name: "bad creds",
+			postedData: url.Values{
+				"email": {"admin@example.com"},
+				"password": {"wrongpass"},
+			},
+			expectedStatusCode: http.StatusSeeOther,
+			expectedLoc: "/",
+		},
+	}
+
+	for _, e := range tests {
+		req, _ := http.NewRequest("POST", "/login", strings.NewReader(e.postedData.Encode()))
+		req = addContextAndSessionToRequest(req, app)
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		rr := httptest.NewRecorder()
+		handler := http.HandlerFunc(app.Login)
+		handler.ServeHTTP(rr, req)
+
+		if rr.Code != e.expectedStatusCode {
+			t.Errorf("%s: returned wrong stat code; expected %d, but got %d", e.name, e.expectedStatusCode, rr.Code)
+		}
+
+		actualLoc, err := rr.Result().Location()
+		if err == nil {
+			if actualLoc.String() != e.expectedLoc {
+				t.Errorf("%s: returned wrong location; expected %s, but got %s", e.name, e.expectedLoc, actualLoc)
+			}
+		} else {
+			t.Errorf("%s: no location header set", e.name)
 		}
 	}
 }
