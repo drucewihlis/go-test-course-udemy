@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/internal/boring/sig"
 	"errors"
 	"fmt"
 	"net/http"
