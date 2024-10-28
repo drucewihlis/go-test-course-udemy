@@ -20,12 +20,12 @@ func Test_app_authenticate(t *testing.T) {
 		requestBody        string
 		expectedStatusCode int
 	}{
-		{"valid user", `{"email": "admin@example.com","password":"secret"}`, http.StatusOK},
+		{"valid user", `{"email":"admin@example.com","password":"secret"}`, http.StatusOK},
 		{"not json", `I'm not JSON`, http.StatusUnauthorized},
 		{"empty json", `{}`, http.StatusUnauthorized},
-		{"empty email", `{"email": ""`, http.StatusUnauthorized},
-		{"empty password", `{"email": "admin@example.com"}`, http.StatusUnauthorized},
-		{"invalid user", `{"email": "admin@someotherdomain.com","password":"secret"}`, http.StatusUnauthorized},
+		{"empty email", `{"email":""}`, http.StatusUnauthorized},
+		{"empty password", `{"email":"admin@example.com"}`, http.StatusUnauthorized},
+		{"invalid user", `{"email":"admin@someotherdomain.com","password":"secret"}`, http.StatusUnauthorized},
 	}
 
 	for _, e := range theTests {
@@ -38,7 +38,7 @@ func Test_app_authenticate(t *testing.T) {
 		handler.ServeHTTP(rr, req)
 
 		if e.expectedStatusCode != rr.Code {
-			t.Errorf("%s: returned wrong stat code; expected %d, but got %d", e.name, e.expectedStatusCode, rr.Code)
+			t.Errorf("%s: returned wrong status code; expected %d but got %d", e.name, e.expectedStatusCode, rr.Code)
 		}
 	}
 }
@@ -88,20 +88,22 @@ func Test_app_refresh(t *testing.T) {
 		handler.ServeHTTP(rr, req)
 
 		if rr.Code != e.expectedStatusCode {
-			t.Errorf("%s: expected status %d, but got %d", e.name, e.expectedStatusCode, rr.Code)
+			t.Errorf("%s: expected status of %d but got %d", e.name, e.expectedStatusCode, rr.Code)
 		}
 
 		refreshTokenExpiry = oldRefreshTime
 	}
+
+	
 }
 
-func Test_app_userHandlers(t *testing.T) {
-	var tests = []struct {
-		name           string
-		method         string
-		json           string
-		paramID        string
-		handler        http.HandlerFunc
+func Test_app_userHandlers(t *testing.T){
+	var tests = []struct{
+		name string
+		method string
+		json string
+		paramID string
+		handler http.HandlerFunc
 		expectedStatus int
 	}{
 		{"allUsers", "GET", "", "", app.allUsers, http.StatusOK},
@@ -111,51 +113,51 @@ func Test_app_userHandlers(t *testing.T) {
 		{"getUser invalid", "GET", "", "100", app.getUser, http.StatusBadRequest},
 		{"getUser bad URL param", "GET", "", "Y", app.getUser, http.StatusBadRequest},
 		{
-			"updateUser valid", 
-			"PATCH", 
-			`{"id":1,"first_name":"Administrator","last_name":"User","email":"admin@example.com"}`, 
-			"", 
-			app.updateUser, 
+			"updateUser valid",
+			"PATCH",
+			`{"id":1,"first_name":"Administrator","last_name":"User","email":"admin@example.com"}`,
+			"",
+			app.updateUser,
 			http.StatusNoContent,
 		},
 		{
-			"updateUser invalid", 
-			"PATCH", 
-			`{"id":100,"first_name":"Administrator","last_name":"User","email":"admin@example.com"}`, 
-			"", 
-			app.updateUser, 
+			"updateUser invalid",
+			"PATCH",
+			`{"id":100,"first_name":"Administrator","last_name":"User","email":"admin@example.com"}`,
+			"",
+			app.updateUser,
 			http.StatusBadRequest,
 		},
 		{
-			"updateUser invalid json", 
-			"PATCH", 
-			`{"id":1,first_name":"Administrator","last_name":"User","email":"admin@example.com"}`, 
-			"", 
-			app.updateUser, 
+			"updateUser invalid json",
+			"PATCH",
+			`{"id":1,first_name:"Administrator","last_name":"User","email":"admin@example.com"}`,
+			"",
+			app.updateUser,
 			http.StatusBadRequest,
 		},
 		{
-			"insertUser valid", 
-			"PUT", 
-			`{"first_name":"Jack","last_name":"Smith","email":"jack@example.com"}`, 
-			"", 
-			app.insertUser, 
+			"insertUser valid",
+			"PUT",
+			`{"first_name":"Jack","last_name":"Smith","email":"jack@example.com"}`,
+			"",
+			app.insertUser,
 			http.StatusNoContent,
 		},
 		{
-			"insertUser invalid", 
-			"PUT", 
-			`{"foo":"bar","first_name":"Jack","last_name":"Smith","email":"jack@example.com"}`, 
-			"", 
-			app.insertUser, 
+			"insertUser invalid",
+			"PUT",
+			`{"foo":"bar","first_name":"Jack","last_name":"Smith","email":"jack@example.com"}`,
+			"",
+			app.insertUser,
 			http.StatusBadRequest,
 		},
 		{
-			"insertUser invalid json", 
-			"PUT", 
-			`{first_name:"Jack","last_name":"Smith","email":"jack@example.com"}`, 
-			"", 
-			app.insertUser, 
+			"insertUser invalid json",
+			"PUT",
+			`{first_name:"Jack","last_name":"Smith","email":"jack@example.com"}`,
+			"",
+			app.insertUser,
 			http.StatusBadRequest,
 		},
 	}

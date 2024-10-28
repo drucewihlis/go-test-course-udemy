@@ -13,6 +13,11 @@ Run app
 docker-compose up -d  # spins up db
 go run ./cmd/web  # runs app itself
 http://localhost:8080/
+
+
+go run ./cmd/api
+http://localhost:8090/
+
 ```
 
 Test

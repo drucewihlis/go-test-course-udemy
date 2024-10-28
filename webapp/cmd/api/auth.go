@@ -26,14 +26,15 @@ type Claims struct {
 }
 
 func (app *application) getTokenFromHeaderAndVerify(w http.ResponseWriter, r *http.Request) (string, *Claims, error) {
-	// we expect our auth token to look like this: `Bearer <token>`
-	// add a header
+	// we expect our authorization header to look like this:
+	// Bearer <token>
+	// add a header 
 	w.Header().Add("Vary", "Authorization")
 
-	// get the auth header
+	// get the authorization header
 	authHeader := r.Header.Get("Authorization")
 
-	// sanity check 
+	// sanity check
 	if authHeader == "" {
 		return "", nil, errors.New("no auth header")
 	}
@@ -44,29 +45,29 @@ func (app *application) getTokenFromHeaderAndVerify(w http.ResponseWriter, r *ht
 		return "", nil, errors.New("invalid auth header")
 	}
 
-	// check to see if we ave the word Bearer
+	// check to see if we have the word "Bearer"
 	if headerParts[0] != "Bearer" {
 		return "", nil, errors.New("unauthorized: no Bearer")
 	}
 
 	token := headerParts[1]
 
-	// declare an empty Claims var
+	// declare an empty Claims variable
 	claims := &Claims{}
 
 	// parse the token with our claims (we read into claims), using our secret (from the receiver)
-	_, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+	_, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error){
 		// validate the signing algorithm
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("unexepected signing method: %v", token.Header["alg"])
 		}
 		return []byte(app.JWTSecret), nil
 	})
 
-	// check for an err; note that this cathes expired tokens as well.
+	// check for an error; note that this catches expired tokens as well.
 	if err != nil {
 		if strings.HasPrefix(err.Error(), "token is expired by") {
-			return "", nil, errors.New("token expired")
+			return "", nil, errors.New("expired token")
 		}
 		return "", nil, err
 	}
@@ -81,10 +82,10 @@ func (app *application) getTokenFromHeaderAndVerify(w http.ResponseWriter, r *ht
 }
 
 func (app *application) generateTokenPair(user *data.User) (TokenPairs, error) {
-	// Create the token
+	// Create the token.
 	token := jwt.New(jwt.SigningMethodHS256)
 
-	// set the claims
+	// set claims
 	claims := token.Claims.(jwt.MapClaims)
 	claims["name"] = fmt.Sprintf("%s %s", user.FirstName, user.LastName)
 	claims["sub"] = fmt.Sprint(user.ID)
@@ -109,7 +110,8 @@ func (app *application) generateTokenPair(user *data.User) (TokenPairs, error) {
 	refreshToken := jwt.New(jwt.SigningMethodHS256)
 	refreshTokenClaims := refreshToken.Claims.(jwt.MapClaims)
 	refreshTokenClaims["sub"] = fmt.Sprint(user.ID)
-	// set the expiry; must be longer than jwt expiry
+	
+	// set expiry; must be longer than jwt expiry
 	refreshTokenClaims["exp"] = time.Now().Add(refreshTokenExpiry).Unix()
 
 	// create signed refresh token
@@ -122,5 +124,7 @@ func (app *application) generateTokenPair(user *data.User) (TokenPairs, error) {
 		Token: signedAccessToken,
 		RefreshToken: signedRefreshToken,
 	}
+
+
 	return tokenPairs, nil
 }

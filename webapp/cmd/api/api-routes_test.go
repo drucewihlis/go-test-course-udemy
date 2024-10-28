@@ -1,7 +1,4 @@
-// start app and
-// go test -v ./... // look for tests in current dir and its subdirs
 package main
-
 
 import (
 	"net/http"
@@ -22,7 +19,8 @@ func Test_app_routes(t *testing.T) {
 		{"/users/{userID}", "GET"},
 		{"/users/{userID}", "DELETE"},
 		{"/users/", "PATCH"},
-		{"/users/", "PUT"},	
+		{"/users/", "PUT"},
+		
 	}
 
 	mux := app.routes()
@@ -40,7 +38,7 @@ func Test_app_routes(t *testing.T) {
 func routeExists(testRoute, testMethod string, chiRoutes chi.Routes) bool {
 	found := false
 
-	_ = chi.Walk(chiRoutes, func(method, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
+	_ = chi.Walk(chiRoutes, func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
 		if strings.EqualFold(method, testMethod) && strings.EqualFold(route, testRoute) {
 			found = true
 		}
